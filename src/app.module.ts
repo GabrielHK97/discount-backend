@@ -5,7 +5,6 @@ import { AdminModule } from './resources/admin/admin.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Admin } from './resources/admin/entities/admin.entity';
 import { PersonModule } from './resources/person/person.module';
-import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,7 +24,6 @@ dotenv.config();
     }),
     AdminModule,
     PersonModule,
-    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,13 +7,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
-import { IS_PUBLIC_KEY } from '../utils/decorators/public.decorator';
-import { extractTokenFromHeader } from '../utils/functions/extractTokenFromHeader.function';
+import { IS_PUBLIC_KEY } from 'src/utils/decorators/public.decorator';
+import { extractTokenFromHeader } from 'src/utils/functions/extractTokenFromHeader.function';
 
 dotenv.config();
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
