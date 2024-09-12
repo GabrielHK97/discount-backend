@@ -11,11 +11,11 @@ import { Admin } from 'src/resources/admin/entities/admin.entity';
 import { toDataURL } from 'qrcode';
 import * as speakeasy from 'speakeasy';
 
-interface Token {
+export interface IToken {
   token: string;
 }
 
-interface QRCode {
+export interface IQRCode {
   status: boolean;
 }
 
@@ -59,34 +59,48 @@ export class AuthService {
     }
   }
 
-  async login(authDto: AuthDto): Promise<ServiceData<Token>> {
+  async login(authDto: AuthDto): Promise<ServiceData<IToken | IQRCode>> {
     try {
       const auth = await this.adminRepository.findOneByOrFail({
         username: authDto.username,
       });
-      const authenticated: boolean[] = [];
-      authenticated.push(await bcrypt.compare(authDto.password, auth.password));
-      authenticated.push(
-        auth.qrcodeActive
-          ? speakeasy.totp.verify({
-              secret: process.env.QRCODE_SECRET!,
-              token: authDto.token,
-              algorithm: 'sha1',
-            })
-          : true,
+      const isPasswordValid = await bcrypt.compare(
+        authDto.password,
+        auth.password,
       );
-      return authenticated.some((item) => {
-        return item === false;
-      })
-        ? new ServiceData<Token>(HttpStatus.BAD_REQUEST, 'Credenciais inválidas!')
-        : new ServiceData<Token>(HttpStatus.OK, 'Logado!', {
-            token: this.jwtService.sign({
-              id: auth.id,
-              username: auth.username,
-            }),
-          });
+      const isTwoFARequired = auth.qrcodeActive;
+      const isTwoFAValid = isTwoFARequired
+        ? speakeasy.totp.verify({
+            secret: process.env.QRCODE_SECRET!,
+            token: authDto.twofa,
+            algorithm: 'sha1',
+          })
+        : true;
+      if (!isPasswordValid) {
+        return new ServiceData<IToken>(
+          HttpStatus.BAD_REQUEST,
+          'Credenciais inválidas!',
+        );
+      }
+      if (isTwoFARequired && !authDto.twofa) {
+        return new ServiceData<IQRCode>(HttpStatus.OK, 'Pré-Logado!', {
+          status: true,
+        });
+      }
+      if (!isTwoFAValid) {
+        return new ServiceData<IToken>(
+          HttpStatus.BAD_REQUEST,
+          'Credenciais inválidas!',
+        );
+      }
+      return new ServiceData<IToken>(HttpStatus.OK, 'Logado!', {
+        token: this.jwtService.sign({
+          id: auth.id,
+          username: auth.username,
+        }),
+      });
     } catch (error) {
-      return new ServiceData<Token>(
+      return new ServiceData<IToken>(
         HttpStatus.BAD_REQUEST,
         'Credenciais inválidas!',
       );
@@ -108,7 +122,7 @@ export class AuthService {
       });
   }
 
-  async statusQRCode(req: Request): Promise<ServiceData<QRCode>> {
+  async statusQRCode(req: Request): Promise<ServiceData<IQRCode>> {
     try {
       const token = extractTokenFromHeader(req.headers.cookie);
       const payload = await this.jwtService.verifyAsync(token, {
@@ -150,11 +164,13 @@ export class AuthService {
 
   async disableQRCode(authDto: AuthDto, req: Request): Promise<ServiceData> {
     try {
-      if (speakeasy.totp.verify({
-        secret: process.env.QRCODE_SECRET!,
-        token: authDto.token,
-        algorithm: 'sha1',
-      })) {
+      if (
+        speakeasy.totp.verify({
+          secret: process.env.QRCODE_SECRET!,
+          token: authDto.twofa,
+          algorithm: 'sha1',
+        })
+      ) {
         const token = extractTokenFromHeader(req.headers.cookie);
         const payload = await this.jwtService.verifyAsync(token, {
           secret: process.env.JWT_SECRET,

@@ -8,7 +8,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService, IToken } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from './auth.guard';
@@ -35,16 +35,17 @@ export class AuthController {
     return response.data
       ? res
           .status(response.status)
-          .cookie('token', response.data.token, {httpOnly: true})
+          .cookie('token', (response.data as IToken).token, { httpOnly: true })
           .send(response.getMetadata())
       : res.status(response.status).send(response.getMetadata());
   }
 
   @Get('/logout')
-  async logout(
-    @Res() res: Response,
-  ): Promise<Response> {
-    return res.status(HttpStatus.OK).cookie('token', 'logout', {httpOnly: true}).send();
+  async logout(@Res() res: Response): Promise<Response> {
+    return res
+      .status(HttpStatus.OK)
+      .cookie('token', 'logout', { httpOnly: true })
+      .send();
   }
 
   @Get()
@@ -57,30 +58,34 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('/qrcode')
+  @Get('/qrcode')
   async generateQRCode(@Req() req: Request, @Res() res: Response) {
-      const serviceData = await this.authService.generateQRCode(req);
-      return res.status(serviceData.status).send(serviceData.getMetadata());
+    const serviceData = await this.authService.generateQRCode(req);
+    return res.status(serviceData.status).send(serviceData.getMetadata());
   }
 
   @UseGuards(AuthGuard)
-  @Post('/qrcode/status')
+  @Get('/qrcode/status')
   async statusQRCode(@Req() req: Request, @Res() res: Response) {
-      const serviceData = await this.authService.statusQRCode(req);
-      return res.status(serviceData.status).send(serviceData.getMetadata());
+    const serviceData = await this.authService.statusQRCode(req);
+    return res.status(serviceData.status).send(serviceData.getMetadata());
   }
 
   @UseGuards(AuthGuard)
-  @Post('/qrcode/enable')
+  @Get('/qrcode/enable')
   async enableQRCode(@Req() req: Request, @Res() res: Response) {
-      const serviceData = await this.authService.enableQRCode(req);
-      return res.status(serviceData.status).send(serviceData.getMetadata());
+    const serviceData = await this.authService.enableQRCode(req);
+    return res.status(serviceData.status).send(serviceData.getMetadata());
   }
 
   @UseGuards(AuthGuard)
   @Post('/qrcode/disable')
-  async disableQRCode(@Body() authDto: AuthDto, @Req() req: Request, @Res() res: Response) {
-      const serviceData = await this.authService.disableQRCode(authDto, req);
-      return res.status(serviceData.status).send(serviceData.getMetadata());
+  async disableQRCode(
+    @Body() authDto: AuthDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const serviceData = await this.authService.disableQRCode(authDto, req);
+    return res.status(serviceData.status).send(serviceData.getMetadata());
   }
 }
