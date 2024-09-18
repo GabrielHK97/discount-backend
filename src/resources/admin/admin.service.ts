@@ -70,12 +70,6 @@ export class AdminService {
             algorithm: 'sha1',
           })
         : true;
-        console.log(adminDto.twofa);
-        console.log(speakeasy.totp.verify({
-          secret: process.env.QRCODE_SECRET!,
-          token: adminDto.twofa,
-          algorithm: 'sha1',
-        }));
       if (!isPasswordValid) {
         return new ServiceData<IToken>(
           HttpStatus.BAD_REQUEST,
@@ -221,7 +215,6 @@ export class AdminService {
         );
       }
     } catch (error) {
-      console.log(error);
       return new ServiceData(
         HttpStatus.BAD_REQUEST,
         `Não foi possível gerar o QRCode!`,

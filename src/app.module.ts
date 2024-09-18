@@ -5,6 +5,9 @@ import { AdminModule } from './resources/admin/admin.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Admin } from './resources/admin/entities/admin.entity';
 import { PersonModule } from './resources/person/person.module';
+import { StoreModule } from './resources/store/store.module';
+import { StoreAddressModule } from './resources/store-address/store-address.module';
+import { CouponModule } from './resources/coupon/coupon.module';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -24,6 +27,9 @@ dotenv.config();
     }),
     AdminModule,
     PersonModule,
+    StoreModule,
+    StoreAddressModule,
+    CouponModule,
   ],
   controllers: [AppController],
   providers: [AppService],
