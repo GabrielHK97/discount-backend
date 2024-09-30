@@ -36,7 +36,7 @@ export class AdminController {
     return response.data
       ? res
           .status(response.status)
-          .cookie('token', (response.data as IToken).token, { httpOnly: true })
+          .cookie('adminToken', (response.data as IToken).token, { httpOnly: true })
           .send(response.getMetadata())
       : res.status(response.status).send(response.getMetadata());
   }
@@ -45,7 +45,7 @@ export class AdminController {
   async logout(@Res() res: Response): Promise<Response> {
     return res
       .status(HttpStatus.OK)
-      .cookie('token', 'logout', { httpOnly: true })
+      .cookie('adminToken', 'logout', { httpOnly: true })
       .send();
   }
 

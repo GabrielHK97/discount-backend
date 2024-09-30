@@ -12,6 +12,9 @@ import { IToken } from './interfaces/token.interface';
 import { IQRCode } from './interfaces/qrcode.interface';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class AdminService {
@@ -102,7 +105,7 @@ export class AdminService {
   }
 
   async authenticate(req: Request): Promise<ServiceData> {
-    const token = extractTokenFromHeader(req.headers.cookie);
+    const token = extractTokenFromHeader('adminToken', req.headers.cookie);
     return await this.jwtService
       .verifyAsync(token)
       .then(() => {
@@ -118,7 +121,7 @@ export class AdminService {
 
   async statusQRCode(req: Request): Promise<ServiceData<IQRCode>> {
     try {
-      const token = extractTokenFromHeader(req.headers.cookie);
+      const token = extractTokenFromHeader('adminToken', req.headers.cookie);
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
@@ -138,7 +141,7 @@ export class AdminService {
 
   async enableQRCode(req: Request): Promise<ServiceData> {
     try {
-      const token = extractTokenFromHeader(req.headers.cookie);
+      const token = extractTokenFromHeader('adminToken', req.headers.cookie);
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
@@ -165,7 +168,7 @@ export class AdminService {
           algorithm: 'sha1',
         })
       ) {
-        const token = extractTokenFromHeader(req.headers.cookie);
+        const token = extractTokenFromHeader('adminToken', req.headers.cookie);
         const payload = await this.jwtService.verifyAsync(token, {
           secret: process.env.JWT_SECRET,
         });
@@ -191,7 +194,7 @@ export class AdminService {
 
   async generateQRCode(req: Request): Promise<ServiceData<any>> {
     try {
-      const token = extractTokenFromHeader(req.headers.cookie);
+      const token = extractTokenFromHeader('adminToken', req.headers.cookie);
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });

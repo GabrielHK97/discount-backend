@@ -25,7 +25,7 @@ export class AdminGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    const token = extractTokenFromHeader(request.headers.cookie);
+    const token = extractTokenFromHeader('adminToken', request.headers.cookie);
     if (!token) {
       throw new UnauthorizedException();
     }

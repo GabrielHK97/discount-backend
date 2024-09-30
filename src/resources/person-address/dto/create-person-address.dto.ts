@@ -1,4 +1,4 @@
-export class CreateStoreAddressDto {
+export class CreatePersonAddressDto {
     place: string;
     number: string;
     complement: string;

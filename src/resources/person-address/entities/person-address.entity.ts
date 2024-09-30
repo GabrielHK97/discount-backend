@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class StoreAddress {
+export class PersonAddress {
 
     @PrimaryGeneratedColumn()
     id: string;
@@ -9,10 +9,10 @@ export class StoreAddress {
     @Column()
     place: string;
 
-    @Column()
+    @Column({nullable: true})
     number: string;
 
-    @Column()
+    @Column({nullable: true})
     complement: string;
 
     @Column()
