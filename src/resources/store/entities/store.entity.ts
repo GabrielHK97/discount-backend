@@ -14,7 +14,7 @@ export class Store {
     @Column()
     fantasyName: string;
 
-    @Column({length: 14})
+    @Column({length: 14, unique: true})
     cnpj: string;
 
     @Column()
@@ -32,10 +32,16 @@ export class Store {
     @Column()
     qrcodeActive: boolean;
 
-    @OneToOne(() => StoreAddress, {onDelete: 'CASCADE'})
+    @Column()
+    createdAt: Date;
+
+    @Column()
+    updatedAt: Date;
+
+    @OneToOne(() => StoreAddress, {cascade: true, onDelete: 'CASCADE'})
     @JoinColumn()
     address: StoreAddress
 
-    @OneToMany(() => Coupon, (coupon) => coupon.store, {nullable: true})
+    @OneToMany(() => Coupon, (coupon) => coupon.store)
     coupons: Coupon[]
 }

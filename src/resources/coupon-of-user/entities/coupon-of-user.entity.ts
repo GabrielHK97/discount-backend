@@ -1,5 +1,6 @@
 import { Coupon } from "src/resources/coupon/entities/coupon.entity";
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/resources/user/entities/user.entity";
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class CouponOfUser {
@@ -10,6 +11,12 @@ export class CouponOfUser {
     @Column()
     claimed: boolean;
 
+    @Column()
+    claimedAt: Date;
+
     @ManyToMany(() => Coupon, (coupons) => coupons.couponsOfUser)
     coupons: Coupon[]
+
+    @ManyToOne(() => User, (user) => user.couponsOfUser)
+    user: User;
 }

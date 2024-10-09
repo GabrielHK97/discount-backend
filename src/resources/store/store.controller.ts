@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { StoreService } from './store.service';
-import { StoreDto } from './dto/store.dto';
+import { LoginStoreDto } from './dto/login-store.dto';
 import { IToken } from '../admin/interfaces/token.interface';
 import { StoreGuard } from './store.guard';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -30,10 +30,10 @@ export class StoreController {
 
   @Post('/login')
   async login(
-    @Body() storeDto: StoreDto,
+    @Body() loginStoreDto: LoginStoreDto,
     @Res() res: Response,
   ): Promise<Response> {
-    const response = await this.storeService.login(storeDto);
+    const response = await this.storeService.login(loginStoreDto);
     return response.data
       ? res
           .status(response.status)
@@ -83,11 +83,11 @@ export class StoreController {
   @UseGuards(StoreGuard)
   @Post('/qrcode/disable')
   async disableQRCode(
-    @Body() storeDto: StoreDto,
+    @Body() loginStoreDto: LoginStoreDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const serviceData = await this.storeService.disableQRCode(storeDto, req);
+    const serviceData = await this.storeService.disableQRCode(loginStoreDto, req);
     return res.status(serviceData.status).send(serviceData.getMetadata());
   }
 }

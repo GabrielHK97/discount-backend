@@ -1,49 +1,91 @@
-import { CouponOfUser } from "src/resources/coupon-of-user/entities/coupon-of-user.entity";
-import { Store } from "src/resources/store/entities/store.entity";
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { format } from 'date-fns';
+import { CouponOfUser } from 'src/resources/coupon-of-user/entities/coupon-of-user.entity';
+import { Store } from 'src/resources/store/entities/store.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Coupon {
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @PrimaryGeneratedColumn()
-    id: string;
+  @Column()
+  name: string;
 
-    @Column()
-    name: string;
+  @Column({ nullable: true })
+  description: string;
 
-    @Column()
-    hasPeriod: boolean;
+  @Column()
+  hasPeriod: boolean;
 
-    @Column()
-    dateStart: Date;
+  @Column({
+    nullable: true,
+    transformer: {
+      to(date: Date) {
+        return date;
+      },
+      from(date: Date) {
+        return format(date, 'dd/MM/yyyy');
+      },
+    },
+  })
+  dateStart: Date;
 
-    @Column()
-    dateEnd: Date;
+  @Column({
+    nullable: true,
+    transformer: {
+      to(date: Date) {
+        return date;
+      },
+      from(date: Date) {
+        return format(date, 'dd/MM/yyyy');
+      },
+    },
+  })
+  dateEnd: Date;
 
-    @Column()
-    hasLimit: boolean;
+  @Column()
+  hasLimit: boolean;
 
-    @Column()
-    limit: number;
+  @Column({ nullable: true })
+  limit: number;
 
-    @Column()
-    used: number;
+  @Column()
+  used: number;
 
-    @Column()
-    hasValue: boolean;
+  @Column()
+  hasValue: boolean;
 
-    @Column()
-    value: number;
+  @Column({
+    nullable: true,
+    transformer: {
+      to(value: number ) {
+        return value ? Number.parseFloat(value.toFixed(2)) : null;
+      },
+      from(value: number) {
+        return value;
+      },
+    },
+  })
+  value: number;
 
-    @Column()
-    hasPercentage: boolean;
+  @Column()
+  hasPercentage: boolean;
 
-    @Column()
-    percentage: number;
+  @Column({ nullable: true })
+  percentage: number;
 
-    @ManyToOne(() => Store, (store) => store.coupons)
-    store: Store;
+  @ManyToOne(() => Store, (store) => store.coupons)
+  store: Store;
 
-    @ManyToMany(() => CouponOfUser, (couponsOfUser) => couponsOfUser.coupons)
-    couponsOfUser: CouponOfUser[]
+  @Column()
+  storeId: string;
+
+  @ManyToMany(() => CouponOfUser, (couponsOfUser) => couponsOfUser.coupons)
+  couponsOfUser: CouponOfUser[];
 }

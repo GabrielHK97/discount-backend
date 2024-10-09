@@ -1,4 +1,3 @@
-import { CreatePersonDto } from "src/resources/person/dto/create-person.dto";
 import { CreateStoreAddressDto } from "src/resources/store-address/dto/create-store-address.dto";
 
 export class CreateStoreDto {
@@ -8,6 +7,7 @@ export class CreateStoreDto {
     realName: string;
     fantasyName: string;
     cnpj: string;
+    email: string;
+    phone: string;
     address: CreateStoreAddressDto
-    person: CreatePersonDto
 }

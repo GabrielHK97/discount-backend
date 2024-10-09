@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  Req,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
@@ -7,19 +18,25 @@ import { UpdateCouponDto } from './dto/update-coupon.dto';
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
 
-  @Post()
-  create(@Body() createCouponDto: CreateCouponDto) {
-    return this.couponService.create(createCouponDto);
+  @Post('/create')
+  async create(
+    @Body() createCouponDto: CreateCouponDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = await this.couponService.create(req, createCouponDto);
+    return res.status(response.status).send(response.getMetadata());
   }
 
-  @Get()
-  findAll() {
-    return this.couponService.findAll();
+  @Post('/list')
+  async findAll(@Res() res: Response) {
+    const response = await this.couponService.findAll();
+    return res.status(response.status).send(response.getMetadata());
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.couponService.findOne(+id);
+    return this.couponService.findOne(id);
   }
 
   @Patch(':id')

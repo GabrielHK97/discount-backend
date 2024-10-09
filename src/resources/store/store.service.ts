@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
 import { Store } from './entities/store.entity';
-import { StoreDto } from './dto/store.dto';
+import { LoginStoreDto } from './dto/login-store.dto';
 import { IToken } from '../admin/interfaces/token.interface';
 import { IQRCode } from '../admin/interfaces/qrcode.interface';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -21,12 +21,12 @@ dotenv.config();
 export class StoreService {
   constructor(
     @InjectRepository(Store)
-    private adminRepository: Repository<Store>,
+    private storeRepository: Repository<Store>,
     private jwtService: JwtService,
   ) {}
 
   async hasUsername(username: string): Promise<boolean> {
-    return await this.adminRepository
+    return await this.storeRepository
       .findOneByOrFail({ username })
       .then(() => {
         return true;
@@ -50,9 +50,11 @@ export class StoreService {
       }
         bcrypt.hash(createStoreDto.password, 10, async (err, hash) => {
           createStoreDto.password = hash;
-          const store = this.adminRepository.create(createStoreDto);
+          const store = this.storeRepository.create(createStoreDto);
           store.qrcodeActive = false;
-          await this.adminRepository.save(store);
+          store.createdAt = new Date;
+          store.updatedAt = store.createdAt;
+          await this.storeRepository.save(store);
         });
         return new ServiceData(HttpStatus.OK, 'Registrado com sucesso!');
       
@@ -64,20 +66,20 @@ export class StoreService {
     }
   }
 
-  async login(storeDto: StoreDto): Promise<ServiceData<IToken | IQRCode>> {
+  async login(loginStoreDto: LoginStoreDto): Promise<ServiceData<IToken | IQRCode>> {
     try {
-      const store = await this.adminRepository.findOneByOrFail({
-        username: storeDto.username,
+      const store = await this.storeRepository.findOneByOrFail({
+        username: loginStoreDto.username,
       });
       const isPasswordValid = await bcrypt.compare(
-        storeDto.password,
+        loginStoreDto.password,
         store.password,
       );
       const isTwoFARequired = store.qrcodeActive;
       const isTwoFAValid = isTwoFARequired
         ? speakeasy.totp.verify({
             secret: process.env.QRCODE_SECRET!,
-            token: storeDto.twofa,
+            token: loginStoreDto.twofa,
             algorithm: 'sha1',
           })
         : true;
@@ -87,7 +89,7 @@ export class StoreService {
           'Credenciais inválidas!',
         );
       }
-      if (isTwoFARequired && !storeDto.twofa) {
+      if (isTwoFARequired && !loginStoreDto.twofa) {
         return new ServiceData<IQRCode>(HttpStatus.OK, 'Pré-Logado!', {
           status: true,
         });
@@ -133,7 +135,7 @@ export class StoreService {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      const store = await this.adminRepository.findOneByOrFail({
+      const store = await this.storeRepository.findOneByOrFail({
         username: payload.username,
       });
       return new ServiceData(HttpStatus.OK, `QRCode ativado!`, {
@@ -153,11 +155,11 @@ export class StoreService {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      const store = await this.adminRepository.findOneByOrFail({
+      const store = await this.storeRepository.findOneByOrFail({
         username: payload.username,
       });
       store.qrcodeActive = true;
-      await this.adminRepository.save(store);
+      await this.storeRepository.save(store);
       return new ServiceData(HttpStatus.OK, `QRCode ativado!`);
     } catch (error) {
       return new ServiceData(
@@ -167,12 +169,12 @@ export class StoreService {
     }
   }
 
-  async disableQRCode(storeDto: StoreDto, req: Request): Promise<ServiceData> {
+  async disableQRCode(loginStoreDto: LoginStoreDto, req: Request): Promise<ServiceData> {
     try {
       if (
         speakeasy.totp.verify({
           secret: process.env.QRCODE_SECRET!,
-          token: storeDto.twofa,
+          token: loginStoreDto.twofa,
           algorithm: 'sha1',
         })
       ) {
@@ -180,11 +182,11 @@ export class StoreService {
         const payload = await this.jwtService.verifyAsync(token, {
           secret: process.env.JWT_SECRET,
         });
-        const store = await this.adminRepository.findOneByOrFail({
+        const store = await this.storeRepository.findOneByOrFail({
           username: payload.username,
         });
         store.qrcodeActive = false;
-        await this.adminRepository.save(store);
+        await this.storeRepository.save(store);
         return new ServiceData(HttpStatus.OK, `QRCode desativado!`);
       } else {
         return new ServiceData(
@@ -206,7 +208,7 @@ export class StoreService {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      const store = await this.adminRepository.findOneByOrFail({
+      const store = await this.storeRepository.findOneByOrFail({
         username: payload.username,
       });
       if (store.qrcodeActive) {

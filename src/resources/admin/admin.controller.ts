@@ -18,14 +18,14 @@ import { AdminGuard } from './admin.guard';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  // @Post('/register')
-  // async register(
-  //   @Body() authDto: AuthDto,
-  //   @Res() res: Response,
-  // ): Promise<Response> {
-  //   const response = await this.authService.register(authDto);
-  //   return res.status(response.status).send(response.getMetadata());
-  // }
+  @Post('/register')
+  async register(
+    @Body() adminDto: AdminDto,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const response = await this.adminService.register(adminDto);
+    return res.status(response.status).send(response.getMetadata());
+  }
 
   @Post('/login')
   async login(

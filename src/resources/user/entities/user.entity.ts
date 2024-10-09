@@ -1,6 +1,6 @@
 import { CouponOfUser } from "src/resources/coupon-of-user/entities/coupon-of-user.entity";
 import { Person } from "src/resources/person/entities/person.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -20,7 +20,7 @@ export class User {
     @OneToOne(() => Person, {onDelete: 'CASCADE'})
     person: Person
 
-    @OneToOne(() => CouponOfUser)
-    couponOfUser: CouponOfUser
+    @OneToMany(() => CouponOfUser, (couponOfUser) => couponOfUser.user)
+    couponsOfUser: CouponOfUser[]
 
 }
