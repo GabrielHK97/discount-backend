@@ -4,6 +4,7 @@ import { Coupon } from '../entities/coupon.entity';
 export class CouponConverter {
   static CouponToCouponDto(coupon: Coupon) {
     const dto = new CouponDto();
+    dto.id = coupon.id;
     dto.name = coupon.name;
     dto.description = coupon.description;
     dto.usage = coupon.hasLimit ? `${coupon.used}/${coupon.limit}` : coupon.used.toString();

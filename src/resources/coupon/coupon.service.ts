@@ -55,7 +55,6 @@ export class CouponService {
       await this.couponRepository.save(coupon);
       return new ServiceData(HttpStatus.OK, 'Criado com sucesso!');
     } catch (error) {
-      console.log(error);
       return new ServiceData(
         HttpStatus.BAD_REQUEST,
         'Não foi possível criar cupom!',
@@ -64,7 +63,6 @@ export class CouponService {
   }
 
   async findAll(paginator: Paginator): Promise<ServiceData<CouponListDto>> {
-    console.log(paginator);
     try {
       const coupons = (
         await this.couponRepository.find({
