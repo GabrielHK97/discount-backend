@@ -56,6 +56,12 @@ export class Coupon {
   limit: number;
 
   @Column()
+  hasLimitPerUser: boolean;
+
+  @Column({ nullable: true })
+  limitPerUser: number;
+
+  @Column()
   used: number;
 
   @Column()

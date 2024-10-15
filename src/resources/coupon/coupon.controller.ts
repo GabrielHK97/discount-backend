@@ -10,6 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Paginator } from 'src/utils/classes/Paginator.class';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
@@ -29,8 +30,8 @@ export class CouponController {
   }
 
   @Post('/list')
-  async findAll(@Res() res: Response) {
-    const response = await this.couponService.findAll();
+  async findAll(@Res() res: Response, @Body() paginator: Paginator) {
+    const response = await this.couponService.findAll(paginator);
     return res.status(response.status).send(response.getMetadata());
   }
 

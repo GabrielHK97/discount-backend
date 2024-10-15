@@ -8,9 +8,11 @@ import { Repository } from 'typeorm';
 import { Store } from '../store/entities/store.entity';
 import { CouponConverter } from './converters/coupon.converter';
 import { CreateCouponDto } from './dto/create-coupon.dto';
-import { ListCouponDto } from './dto/list-coupon.dto';
+import { CouponListDto } from './dto/coupon-list.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Coupon } from './entities/coupon.entity';
+import { CouponDto } from './dto/coupon.dto';
+import { Paginator } from 'src/utils/classes/Paginator.class';
 
 @Injectable()
 export class CouponService {
@@ -53,6 +55,7 @@ export class CouponService {
       await this.couponRepository.save(coupon);
       return new ServiceData(HttpStatus.OK, 'Criado com sucesso!');
     } catch (error) {
+      console.log(error);
       return new ServiceData(
         HttpStatus.BAD_REQUEST,
         'Não foi possível criar cupom!',
@@ -60,27 +63,43 @@ export class CouponService {
     }
   }
 
-  async findAll(): Promise<ServiceData<ListCouponDto[]>> {
+  async findAll(paginator: Paginator): Promise<ServiceData<CouponListDto>> {
+    console.log(paginator);
     try {
-      const coupons = (await this.couponRepository.find()).map((coupon) => {
-        return CouponConverter.CouponToListCouponDto(coupon);
+      const coupons = (
+        await this.couponRepository.find({
+          order: { [paginator!.sort]: paginator!.direction },
+          skip: paginator!.pageSize * paginator!.page,
+          take: paginator!.pageSize
+        })
+      ).map((coupon) => {
+        return CouponConverter.CouponToCouponDto(coupon);
       });
-      return new ServiceData<ListCouponDto[]>(
+      const totalItems = await this.couponRepository.count();
+      const couponList: CouponListDto = {
+        coupons,
+        totalItems,
+        page: 0,
+      };
+      return new ServiceData<CouponListDto>(
         HttpStatus.OK,
         'Listado com sucesso!',
-        coupons,
+        couponList,
       );
     } catch (error) {
-      new ServiceData(HttpStatus.BAD_REQUEST, 'Não foi possível listar cupons');
+      return new ServiceData(
+        HttpStatus.BAD_REQUEST,
+        'Não foi possível listar cupons',
+      );
     }
   }
 
-  async findOne(id: string): Promise<ServiceData<ListCouponDto>> {
+  async findOne(id: string): Promise<ServiceData<CouponDto>> {
     try {
-      const coupon = CouponConverter.CouponToListCouponDto(
+      const coupon = CouponConverter.CouponToCouponDto(
         await this.couponRepository.findOneByOrFail({ id }),
       );
-      return new ServiceData<ListCouponDto>(
+      return new ServiceData<CouponDto>(
         HttpStatus.OK,
         'Achado com sucesso!',
         coupon,

@@ -14,6 +14,9 @@ export class CouponOfUser {
     @Column()
     claimedAt: Date;
 
+    @Column()
+    used: number;
+
     @ManyToMany(() => Coupon, (coupons) => coupons.couponsOfUser)
     coupons: Coupon[]
 

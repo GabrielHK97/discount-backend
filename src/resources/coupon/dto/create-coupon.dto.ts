@@ -6,6 +6,8 @@ export class CreateCouponDto {
     dateEnd: Date;
     hasLimit: boolean;
     limit: number;
+    hasLimitPerUser: boolean;
+    limitPerUser: number;
     used: number;
     hasValue: boolean;
     value: number;
