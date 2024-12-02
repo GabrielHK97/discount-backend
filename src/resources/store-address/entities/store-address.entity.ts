@@ -1,29 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { AddressEntity } from "src/utils/entities/address-entity";
+import { Entity } from "typeorm";
 
 @Entity()
-export class StoreAddress {
-
-    @PrimaryGeneratedColumn()
-    id: string;
-
-    @Column()
-    place: string;
-
-    @Column()
-    number: string;
-
-    @Column()
-    complement: string;
-
-    @Column()
-    zipCode: string;
-
-    @Column()
-    neighborhood: string;
-    
-    @Column()
-    city: string;
-
-    @Column()
-    state: string;
+export class StoreAddress extends AddressEntity{
 }

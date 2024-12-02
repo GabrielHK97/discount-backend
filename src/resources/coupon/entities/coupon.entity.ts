@@ -2,17 +2,15 @@ import { format } from 'date-fns';
 import { CouponOfUser } from 'src/resources/coupon-of-user/entities/coupon-of-user.entity';
 import { Store } from 'src/resources/store/entities/store.entity';
 import {
+  BaseEntity,
   Column,
   Entity,
   ManyToMany,
   ManyToOne,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
-export class Coupon {
-  @PrimaryGeneratedColumn()
-  id: string;
+export class Coupon extends BaseEntity {
 
   @Column()
   name: string;
@@ -60,9 +58,6 @@ export class Coupon {
 
   @Column({ nullable: true })
   limitPerUser: number;
-
-  @Column()
-  used: number;
 
   @Column()
   hasValue: boolean;

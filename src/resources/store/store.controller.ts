@@ -50,6 +50,16 @@ export class StoreController {
       .send();
   }
 
+  @UseGuards(StoreGuard)
+  @Get()
+  async personalData(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const response = await this.storeService.personalData(req);
+    return res.status(response.status).send(response.getMetadata());
+  }
+
   @Get('/authenticate')
   async authenticate(
     @Req() req: Request,

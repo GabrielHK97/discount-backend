@@ -1,12 +1,9 @@
 import { CouponOfUser } from "src/resources/coupon-of-user/entities/coupon-of-user.entity";
 import { Person } from "src/resources/person/entities/person.entity";
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, OneToOne } from "typeorm";
 
 @Entity()
-export class User {
-    
-    @PrimaryGeneratedColumn()
-    id: string;
+export class User extends BaseEntity{
 
     @Column()
     username: string;

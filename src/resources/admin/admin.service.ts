@@ -104,17 +104,18 @@ export class AdminService {
     }
   }
 
-  async authenticate(req: Request): Promise<ServiceData> {
+  async authenticate(req: Request): Promise<ServiceData<boolean>> {
     const token = extractTokenFromHeader('adminToken', req.headers.cookie);
     return await this.jwtService
       .verifyAsync(token)
       .then(() => {
-        return new ServiceData(HttpStatus.OK, 'Autenticado!');
+        return new ServiceData<boolean>(HttpStatus.OK, 'Autenticado!', true);
       })
       .catch(() => {
-        return new ServiceData(
+        return new ServiceData<boolean>(
           HttpStatus.UNAUTHORIZED,
           'Não foi possível autenticar!',
+          false
         );
       });
   }

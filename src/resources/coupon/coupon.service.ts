@@ -6,7 +6,7 @@ import { ServiceData } from 'src/utils/classes/ServiceData.class';
 import { extractTokenFromHeader } from 'src/utils/functions/extractTokenFromHeader.function';
 import { Repository } from 'typeorm';
 import { Store } from '../store/entities/store.entity';
-import { CouponConverter } from './converters/coupon.converter';
+import { CouponConverter } from './converter/coupon.converter';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { CouponListDto } from './dto/coupon-list.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';

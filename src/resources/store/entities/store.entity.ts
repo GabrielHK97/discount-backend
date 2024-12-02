@@ -38,7 +38,7 @@ export class Store {
     @Column()
     updatedAt: Date;
 
-    @OneToOne(() => StoreAddress, {cascade: true, onDelete: 'CASCADE'})
+    @OneToOne(() => StoreAddress, {cascade: true, onDelete: 'CASCADE', eager: true})
     @JoinColumn()
     address: StoreAddress
 

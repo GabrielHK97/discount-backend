@@ -14,6 +14,8 @@ import { LoginStoreDto } from './dto/login-store.dto';
 import { IToken } from '../admin/interfaces/token.interface';
 import { IQRCode } from '../admin/interfaces/qrcode.interface';
 import { CreateStoreDto } from './dto/create-store.dto';
+import { PersonalDataStoreDto } from './dto/personal-data-store.dto';
+import { StoreConverter } from './converter/store.converter';
 
 dotenv.config();
 
@@ -45,19 +47,23 @@ export class StoreService {
       if (await this.hasUsername(createStoreDto.username)) {
         return new ServiceData(HttpStatus.BAD_REQUEST, 'Usuário já existente!');
       }
-      if (!this.equalPasswords(createStoreDto.password, createStoreDto.confirmPassword)) {
+      if (
+        !this.equalPasswords(
+          createStoreDto.password,
+          createStoreDto.confirmPassword,
+        )
+      ) {
         return new ServiceData(HttpStatus.BAD_REQUEST, 'Senhas não coincidem!');
       }
-        bcrypt.hash(createStoreDto.password, 10, async (err, hash) => {
-          createStoreDto.password = hash;
-          const store = this.storeRepository.create(createStoreDto);
-          store.qrcodeActive = false;
-          store.createdAt = new Date;
-          store.updatedAt = store.createdAt;
-          await this.storeRepository.save(store);
-        });
-        return new ServiceData(HttpStatus.OK, 'Registrado com sucesso!');
-      
+      bcrypt.hash(createStoreDto.password, 10, async (err, hash) => {
+        createStoreDto.password = hash;
+        const store = this.storeRepository.create(createStoreDto);
+        store.qrcodeActive = false;
+        store.createdAt = new Date();
+        store.updatedAt = store.createdAt;
+        await this.storeRepository.save(store);
+      });
+      return new ServiceData(HttpStatus.OK, 'Registrado com sucesso!');
     } catch (error) {
       return new ServiceData(
         HttpStatus.BAD_REQUEST,
@@ -66,7 +72,9 @@ export class StoreService {
     }
   }
 
-  async login(loginStoreDto: LoginStoreDto): Promise<ServiceData<IToken | IQRCode>> {
+  async login(
+    loginStoreDto: LoginStoreDto,
+  ): Promise<ServiceData<IToken | IQRCode>> {
     try {
       const store = await this.storeRepository.findOneByOrFail({
         username: loginStoreDto.username,
@@ -114,17 +122,44 @@ export class StoreService {
     }
   }
 
-  async authenticate(req: Request): Promise<ServiceData> {
+  async authenticate(req: Request): Promise<ServiceData<boolean>> {
     const token = extractTokenFromHeader('storeToken', req.headers.cookie);
     return await this.jwtService
       .verifyAsync(token)
       .then(() => {
-        return new ServiceData(HttpStatus.OK, 'Autenticado!');
+        return new ServiceData(HttpStatus.OK, 'Autenticado!', true);
       })
       .catch(() => {
         return new ServiceData(
           HttpStatus.UNAUTHORIZED,
           'Não foi possível autenticar!',
+          false,
+        );
+      });
+  }
+
+  async personalData(req: Request): Promise<ServiceData<PersonalDataStoreDto>> {
+    const token = extractTokenFromHeader('storeToken', req.headers.cookie);
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET,
+    });
+    const store = await this.storeRepository.findOneByOrFail({
+      username: payload.username,
+    });
+    return await this.jwtService
+      .verifyAsync(token)
+      .then(() => {
+        return new ServiceData<PersonalDataStoreDto>(
+          HttpStatus.OK,
+          'Dados pessoais trazidos!',
+          StoreConverter.StoretoPersonalDataStoreDto(store),
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+        return new ServiceData(
+          HttpStatus.UNAUTHORIZED,
+          'Não foi possível trazer dados pessoais!',
         );
       });
   }
@@ -169,7 +204,10 @@ export class StoreService {
     }
   }
 
-  async disableQRCode(loginStoreDto: LoginStoreDto, req: Request): Promise<ServiceData> {
+  async disableQRCode(
+    loginStoreDto: LoginStoreDto,
+    req: Request,
+  ): Promise<ServiceData> {
     try {
       if (
         speakeasy.totp.verify({
